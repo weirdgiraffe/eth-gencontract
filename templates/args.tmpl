@@ -3,7 +3,8 @@ ctx context.Context
 {{- range $index, $arg := . -}}
 	, {{ $arg.Name }} {{ $arg.Type }}
 {{- end -}}
-{{ end }}
+, opts ...func(*ethereum.CallMsg)
+{{- end -}}
 
 {{ define "outputs" -}}
 {{- if gt (len .) 0 -}} ( {{- end -}}

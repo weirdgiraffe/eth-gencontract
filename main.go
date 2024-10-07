@@ -76,6 +76,7 @@ func main() {
 
 	cleaned, err := imports.Process("", content, nil)
 	if err != nil {
+		fmt.Println(string(content))
 		fmt.Fprintf(os.Stderr, "failed to run go imports for generated contract code for address=%s: %v\n", *address, err)
 		os.Exit(1)
 	}

@@ -18,7 +18,13 @@ func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inpu
 		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed to pack arguments: %w", err)
 	}
 
-	msg := ethereum.CallMsg{To: &c.address, Data: input}
+	msg := ethereum.CallMsg{}
+	for _, opt := range opts {
+		opt(&msg)
+	}
+	msg.To = &c.Address
+	msg.Data = input
+
 	{{ if .Outputs -}}res{{- else -}}_{{- end -}}, err {{ if .Outputs }}:{{ end }}= c.caller.CallContract(ctx, msg, nil)
 	if err != nil {
 		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed call method: %w", err)
