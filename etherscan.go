@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Etherscan struct {
@@ -24,7 +26,7 @@ func NewEtherscan(apiKey string) *Etherscan {
 	}
 }
 
-func (e *Etherscan) GetContractABI(ctx context.Context, contractAddress string) ([]byte, error) {
+func (e *Etherscan) GetContractABI(ctx context.Context, contract common.Address) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, "https://api.etherscan.io/api", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init http request: %w", err)
@@ -32,7 +34,7 @@ func (e *Etherscan) GetContractABI(ctx context.Context, contractAddress string) 
 	query := req.URL.Query()
 	query.Set("module", "contract")
 	query.Set("action", "getabi")
-	query.Set("address", contractAddress)
+	query.Set("address", contract.Hex())
 	req.URL.RawQuery = query.Encode()
 
 	res, err := e.http.Do(req.WithContext(ctx))

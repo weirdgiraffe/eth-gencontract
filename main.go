@@ -5,6 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 var (
@@ -22,10 +25,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ETHERSCAN_API_KEY is required")
 		os.Exit(1)
 	}
-	etherscan := NewEtherscan(apiKey)
 
-	if *pkg == "" {
-		fmt.Fprintf(os.Stderr, "pkg is required")
+	rpcURL := os.Getenv("RPC_URL")
+	if rpcURL == "" {
+		fmt.Fprintf(os.Stderr, "RPC_URL is required")
 		os.Exit(1)
 	}
 
@@ -34,10 +37,28 @@ func main() {
 		os.Exit(1)
 	}
 
+	if common.IsHexAddress(*address) {
+		fmt.Fprintf(os.Stderr, "invalid address: %s", *address)
+		os.Exit(1)
+	}
+
+	if *pkg == "" {
+		fmt.Fprintf(os.Stderr, "pkg is required")
+		os.Exit(1)
+	}
+
 	if *name == "" {
 		fmt.Fprintf(os.Stderr, "name is required")
 		os.Exit(1)
 	}
+
+	rpc, err := ethclient.Dial(rpcURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to init rpc client: %v", err)
+		os.Exit(1)
+	}
+	etherscan := NewEtherscan(apiKey)
+	resolver := NewProxyResolver(rpc, etherscan)
 
 	out := os.Stdout
 	if *output != "" {
@@ -50,7 +71,7 @@ func main() {
 		out = f
 	}
 
-	jsonABI, err := etherscan.GetContractABI(context.Background(), *address)
+	jsonABI, err := resolver.GetContractABI(context.Background(), common.HexToAddress(*address))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to init etherscan: %v", err)
 		os.Exit(1)
