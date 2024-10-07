@@ -69,6 +69,7 @@ func GenerateCodeForJSON(pkg, name, address string, jsonABI string, out io.Write
 	if err != nil {
 		return fmt.Errorf("failed to render template: %w", err)
 	}
+
 	contents, err := format.Source(buf.Bytes())
 	if err != nil {
 		return fmt.Errorf("failed to formatc content: %w", err)
@@ -89,6 +90,7 @@ func collectMethod(contract *Contract, method abi.Method) error {
 	for i := range typ {
 		contract.Types[typ[i].Name] = typ[i].Fields
 	}
+
 	contract.Method = append(contract.Method, Method{
 		Contract: contract.Name,
 		Name:     method.Name,
@@ -177,12 +179,18 @@ func asArguments(abiArgs abi.Arguments) ([]Type, Arguments) {
 	for _, arg := range abiArgs {
 		typName := arg.Type.GetType().String()
 		customType := false
+
 		if typ := arg.Type.GetType(); isOfCustomType(typ) {
-			typName = typPrefixes(typ) + strcase.UpperCamelCase(arg.Name)
-			types = append(types, Type{
+			typName = strcase.UpperCamelCase(arg.Name)
+			if typName == "" {
+				typName = arg.Type.TupleRawName
+			}
+			typName = typPrefixes(typ) + typName
+			ctype := Type{
 				Name:   typName,
 				Fields: asStructFields(typ),
-			})
+			}
+			types = append(types, ctype)
 			customType = true
 		}
 		args = append(args, Argument{

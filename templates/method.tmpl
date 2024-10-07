@@ -31,7 +31,7 @@ func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inpu
 
 	{{- range $index, $out := .Outputs }}
 		{{- if $out.CustomType }}
-	out{{- $index }} = abi.ConvertType(results, &out{{- $index }}).(*{{- $out.Type -}})
+	out{{- $index }} = *abi.ConvertType(results, &out{{- $index }}).(*{{- $out.Type -}})
 		{{- else }}
 	out{{- $index }} = results[{{- $index }}].({{- $out.Type }})
 		{{- end }}
