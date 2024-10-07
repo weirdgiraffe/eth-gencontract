@@ -20,8 +20,8 @@ import (
 )
 
 type {{ .Name }} struct {
-	abi     abi.ABI
 	caller  ethereum.ContractCaller
+	ABI     abi.ABI
 	Address common.Address
 }
 
@@ -32,9 +32,9 @@ func New{{- .Name -}}(caller ethereum.ContractCaller) *{{- .Name }} {
 func New{{- .Name -}}ForAddress(caller ethereum.ContractCaller, address common.Address) *{{- .Name }} {
 	abi, _ := abi.JSON(strings.NewReader({{- PrivateVarName .Name -}}JSONABI))
 	return  &{{- .Name -}} {
-		abi:     abi,
-		Address: address,
 		caller:  caller,
+		ABI:     abi,
+		Address: address,
 	}
 }
 
