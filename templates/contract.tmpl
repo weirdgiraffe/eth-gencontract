@@ -1,0 +1,47 @@
+package {{ .Package }}
+
+import (
+	"context"
+	"fmt"
+	"math/big"
+	"strings"
+
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+)
+
+type {{ .Name }} struct {
+	abi     abi.ABI
+	address common.Address
+	caller  ethereum.ContractCaller
+}
+
+func New{{- .Name -}}(caller ethereum.ContractCaller) *{{- .Name }} {
+	return New{{- .Name -}}ForAddress(caller, common.HexToAddress("{{- .Address -}}"))
+}
+
+func New{{- .Name -}}ForAddress(caller ethereum.ContractCaller, address common.Address) *{{- .Name }} {
+	abi, _ := abi.JSON(strings.NewReader({{- PrivateVarName .Name -}}JSONABI))
+	return  &{{- .Name -}} {
+		abi:     abi,
+		address: address,
+		caller:  caller,
+	}
+}
+
+{{- range .Method }}
+	{{ template "method.tmpl" . }}
+{{- end }}
+
+
+{{- range $name, $fields := .Types }}
+type {{ $name }} struct {
+	{{- range $fields }}
+	{{ .Name }} {{ .Type.String }}
+	{{- end }}
+}
+{{- end }}
+
+
+var {{ PrivateVarName .Name -}}JSONABI = `{{ .JSONABI }}`

@@ -1,0 +1,20 @@
+{{ define "inputs" -}}
+ctx context.Context
+{{- range $index, $arg := . -}}
+	, {{ $arg.Name }} {{ $arg.Type }}
+{{- end -}}
+{{ end }}
+
+{{ define "outputs" -}}
+{{- if gt (len .) 0 -}} ( {{- end -}}
+{{- range $index, $arg := . -}}
+	{{- if $index }} {{ end -}}
+	{{ if $arg.Name }}{{ $arg.Name }} {{ end }}{{ $arg.Type -}},
+{{- end -}}
+{{- if . }}
+	{{- $elem := index . 0 -}}
+	{{- if $elem.Name -}} err {{ end -}}
+{{ end -}}
+error
+{{- if gt (len .) 0 -}} ) {{- end }}
+{{- end }}

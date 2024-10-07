@@ -1,0 +1,42 @@
+{{ define "results" -}}
+{{ range $index, $out := . -}}
+	{{ if $index }}, {{end}}out{{- $index }} 
+{{- end }}
+{{- end }}
+
+
+{{ define "method.tmpl" }}
+func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inputs -}}) {{ template "outputs" .Outputs }} {
+	{{ if gt (len .Outputs) 0 -}} var ( {{- end }}
+	{{- range $index, $out := .Outputs }}
+		out{{- $index }} {{ $out.Type }}
+	{{ end }}
+	{{- if gt (len .Outputs) 0 -}} ) {{- end }}
+
+	input, err := c.abi.Pack("{{ .Name }}" {{- range $index, $arg := .Inputs -}} , {{ $arg.Name }} {{- end -}})
+	if err != nil {
+		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed to pack arguments: %w", err)
+	}
+
+	msg := ethereum.CallMsg{To: &c.address, Data: input}
+	{{ if .Outputs -}}res{{- else -}}_{{- end -}}, err {{ if .Outputs }}:{{ end }}= c.caller.CallContract(ctx, msg, nil)
+	if err != nil {
+		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed call method: %w", err)
+	}
+	{{- if .Outputs }}
+	results, err := c.abi.Unpack("{{ .Name }}", res)
+	if err != nil {
+		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed to unpack outputs: %w", err)
+	}
+
+	{{- range $index, $out := .Outputs }}
+		{{- if $out.CustomType }}
+	out{{- $index }} = abi.ConvertType(results, &out{{- $index }}).(*{{- $out.Type -}})
+		{{- else }}
+	out{{- $index }} = results[{{- $index }}].({{- $out.Type }})
+		{{- end }}
+	{{- end }}
+	{{ end }}
+	return {{ template "results" .Outputs}}{{- if .Outputs }}, {{ end -}} nil
+}
+{{ end }}
