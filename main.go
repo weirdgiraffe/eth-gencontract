@@ -22,39 +22,39 @@ func main() {
 
 	apiKey := os.Getenv("ETHERSCAN_API_KEY")
 	if apiKey == "" {
-		fmt.Fprintf(os.Stderr, "ETHERSCAN_API_KEY is required")
+		fmt.Fprintf(os.Stderr, "ETHERSCAN_API_KEY is required\n")
 		os.Exit(1)
 	}
 
 	rpcURL := os.Getenv("RPC_URL")
 	if rpcURL == "" {
-		fmt.Fprintf(os.Stderr, "RPC_URL is required")
+		fmt.Fprintf(os.Stderr, "RPC_URL is required\n")
 		os.Exit(1)
 	}
 
 	if *address == "" {
-		fmt.Fprintf(os.Stderr, "address is required")
+		fmt.Fprintf(os.Stderr, "address is required\n")
 		os.Exit(1)
 	}
 
-	if common.IsHexAddress(*address) {
-		fmt.Fprintf(os.Stderr, "invalid address: %s", *address)
+	if !common.IsHexAddress(*address) {
+		fmt.Fprintf(os.Stderr, "invalid address: %s\n", *address)
 		os.Exit(1)
 	}
 
 	if *pkg == "" {
-		fmt.Fprintf(os.Stderr, "pkg is required")
+		fmt.Fprintf(os.Stderr, "pkg is required\n")
 		os.Exit(1)
 	}
 
 	if *name == "" {
-		fmt.Fprintf(os.Stderr, "name is required")
+		fmt.Fprintf(os.Stderr, "name is required\n")
 		os.Exit(1)
 	}
 
 	rpc, err := ethclient.Dial(rpcURL)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to init rpc client: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to init rpc client: %v\n", err)
 		os.Exit(1)
 	}
 	etherscan := NewEtherscan(apiKey)
@@ -64,7 +64,7 @@ func main() {
 	if *output != "" {
 		f, err := os.Create(*output)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to create output file: %v", err)
+			fmt.Fprintf(os.Stderr, "failed to create output file: %v\n", err)
 			os.Exit(1)
 		}
 		defer f.Close()
@@ -73,13 +73,13 @@ func main() {
 
 	jsonABI, err := resolver.GetContractABI(context.Background(), common.HexToAddress(*address))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to init etherscan: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to init etherscan: %v\n", err)
 		os.Exit(1)
 	}
 
 	err = GenerateCodeForJSON(*pkg, *name, *address, string(jsonABI), out)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to generate code for contract: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to generate code for contract: %v\n", err)
 		os.Exit(1)
 	}
 }
