@@ -3,7 +3,7 @@ ctx context.Context
 {{- range $index, $arg := . -}}
 	, {{ $arg.Name }} {{ $arg.Type }}
 {{- end -}}
-, opts ...func(*ethereum.CallMsg)
+, blockNumber *big.Int
 {{- end -}}
 
 {{ define "outputs" -}}
