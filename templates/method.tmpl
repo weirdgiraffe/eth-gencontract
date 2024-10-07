@@ -23,6 +23,7 @@ func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inpu
 	if err != nil {
 		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed call method: %w", err)
 	}
+
 	{{- if .Outputs }}
 	results, err := c.abi.Unpack("{{ .Name }}", res)
 	if err != nil {
@@ -36,7 +37,9 @@ func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inpu
 	out{{- $index }} = results[{{- $index }}].({{- $out.Type }})
 		{{- end }}
 	{{- end }}
-	{{ end }}
+
+	{{- end }}
+
 	return {{ template "results" .Outputs}}{{- if .Outputs }}, {{ end -}} nil
 }
 {{ end }}

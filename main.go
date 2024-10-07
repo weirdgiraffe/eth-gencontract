@@ -80,7 +80,7 @@ func main() {
 
 	err = GenerateCodeForJSON(*pkg, *name, *address, string(jsonABI), out)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to generate code for contract: %v\n", err)
+		fmt.Fprintf(os.Stderr, "failed to generate code for contract address=%s: %v\n", *address, err)
 		os.Exit(1)
 	}
 }

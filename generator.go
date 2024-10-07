@@ -72,7 +72,8 @@ func GenerateCodeForJSON(pkg, name, address string, jsonABI string, out io.Write
 
 	contents, err := format.Source(buf.Bytes())
 	if err != nil {
-		return fmt.Errorf("failed to formatc content: %w", err)
+		fmt.Println(buf.String())
+		return fmt.Errorf("failed to format content: %w", err)
 	}
 	_, err = fmt.Fprintln(out, string(contents))
 	return err
@@ -126,6 +127,7 @@ type Argument struct {
 	Name       string
 	Type       string
 	CustomType bool
+	IsSlice    bool
 }
 
 type Arguments []Argument
@@ -177,15 +179,21 @@ func asArguments(abiArgs abi.Arguments) ([]Type, Arguments) {
 	var args Arguments
 	var types []Type
 	for _, arg := range abiArgs {
-		typName := arg.Type.GetType().String()
+		argType := arg.Type.GetType().String()
 		customType := false
+		isSlice := false
 
 		if typ := arg.Type.GetType(); isOfCustomType(typ) {
-			typName = strcase.UpperCamelCase(arg.Name)
+			typName := strcase.UpperCamelCase(arg.Name)
 			if typName == "" {
 				typName = arg.Type.TupleRawName
+				if typName == "" {
+					typName = arg.Type.Elem.TupleRawName
+					isSlice = true
+				}
 			}
-			typName = typPrefixes(typ) + typName
+			argType = typPrefixes(typ) + typName
+
 			ctype := Type{
 				Name:   typName,
 				Fields: asStructFields(typ),
@@ -195,8 +203,9 @@ func asArguments(abiArgs abi.Arguments) ([]Type, Arguments) {
 		}
 		args = append(args, Argument{
 			Name:       arg.Name,
-			Type:       typName,
+			Type:       argType,
 			CustomType: customType,
+			IsSlice:    isSlice,
 		})
 	}
 	return types, args
