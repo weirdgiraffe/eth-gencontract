@@ -7,7 +7,6 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/stretchr/testify v1.9.0
-	github.com/weirdgiraffe/promise/v2 v2.0.0-20241003095159-196cdc4cb08c
 )
 
 require (
