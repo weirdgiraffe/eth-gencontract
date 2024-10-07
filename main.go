@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	version = "dev"
 	pkg     = flag.String("pkg", "", "package name")
 	name    = flag.String("name", "", "go contract name")
 	address = flag.String("addr", "", "contract address")

@@ -45,6 +45,7 @@ func GenerateCodeForJSON(pkg, name, address string, jsonABI string, out io.Write
 	}
 
 	contract := Contract{
+		Version: version,
 		Package: pkg,
 		Name:    name,
 		Address: address,
@@ -98,6 +99,7 @@ func collectMethod(contract *Contract, method abi.Method) error {
 }
 
 type Contract struct {
+	Version string
 	Package string
 	Name    string
 	Address string
