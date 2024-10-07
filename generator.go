@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	"go/format"
-	"io"
 	"reflect"
 	"sort"
 	"strconv"
@@ -32,10 +30,10 @@ var tmpl = template.Must(template.New("contract").
 		},
 	}).ParseFS(tmplFS, "templates/*.tmpl"))
 
-func GenerateCodeForJSON(pkg, name, address string, jsonABI string, out io.Writer) error {
+func GenerateCodeForJSON(pkg, name, address string, jsonABI string) ([]byte, error) {
 	contractABI, err := abi.JSON(strings.NewReader(string(jsonABI)))
 	if err != nil {
-		return fmt.Errorf("failed to decode abi from json: %w", err)
+		return nil, fmt.Errorf("failed to decode abi from json: %w", err)
 	}
 
 	methods := make(map[string][]abi.Method)
@@ -58,7 +56,7 @@ func GenerateCodeForJSON(pkg, name, address string, jsonABI string, out io.Write
 		}
 		err = collectMethod(&contract, method[0])
 		if err != nil {
-			return fmt.Errorf("failed to collect method %s: %w", name, err)
+			return nil, fmt.Errorf("failed to collect method %s: %w", name, err)
 		}
 	}
 	sort.Slice(contract.Method, func(i, j int) bool {
@@ -67,16 +65,9 @@ func GenerateCodeForJSON(pkg, name, address string, jsonABI string, out io.Write
 	var buf bytes.Buffer
 	err = tmpl.ExecuteTemplate(&buf, "contract.tmpl", contract)
 	if err != nil {
-		return fmt.Errorf("failed to render template: %w", err)
+		return nil, err
 	}
-
-	contents, err := format.Source(buf.Bytes())
-	if err != nil {
-		fmt.Println(buf.String())
-		return fmt.Errorf("failed to format content: %w", err)
-	}
-	_, err = fmt.Fprintln(out, string(contents))
-	return err
+	return buf.Bytes(), nil
 }
 
 func collectMethod(contract *Contract, method abi.Method) error {

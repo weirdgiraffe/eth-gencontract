@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"golang.org/x/tools/imports"
 )
 
 var (
@@ -61,26 +62,30 @@ func main() {
 	etherscan := NewEtherscan(apiKey)
 	resolver := NewProxyResolver(rpc, etherscan)
 
-	out := os.Stdout
-	if *output != "" {
-		f, err := os.Create(*output)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to create output file: %v\n", err)
-			os.Exit(1)
-		}
-		defer f.Close()
-		out = f
-	}
-
 	jsonABI, err := resolver.GetContractABI(context.Background(), common.HexToAddress(*address))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to init etherscan: %v\n", err)
 		os.Exit(1)
 	}
 
-	err = GenerateCodeForJSON(*pkg, *name, *address, string(jsonABI), out)
+	content, err := GenerateCodeForJSON(*pkg, *name, *address, string(jsonABI))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to generate code for contract address=%s: %v\n", *address, err)
+		os.Exit(1)
+	}
+
+	cleaned, err := imports.Process("", content, nil)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to run go imports for generated contract code for address=%s: %v\n", *address, err)
+		os.Exit(1)
+	}
+
+	if *output == "" {
+		*output = *name + ".go"
+	}
+	err = os.WriteFile(*output, cleaned, 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to write output file: %v\n", err)
 		os.Exit(1)
 	}
 }
