@@ -3,7 +3,7 @@ ctx context.Context
 {{- range $index, $arg := . -}}
 	, {{ $arg.Name }} {{ $arg.Type }}
 {{- end -}}
-, _blockNumber *big.Int
+, opts ...callopts.Opt
 {{- end -}}
 
 {{ define "outputs" -}}

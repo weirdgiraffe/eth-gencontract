@@ -17,10 +17,11 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/weirdgiraffe/eth-gencontract/pkg/callopts"
 )
 
 type {{ .Name }} struct {
-	caller  ethereum.ContractCaller
+	caller  *callopts.ContractCaller
 	Address common.Address
 }
 
@@ -30,7 +31,7 @@ func New{{- .Name -}}(caller ethereum.ContractCaller) *{{- .Name }} {
 
 func New{{- .Name -}}ForAddress(caller ethereum.ContractCaller, address common.Address) *{{- .Name }} {
 	return  &{{- .Name -}} {
-		caller:  caller,
+		caller:  callopts.WrapCaller(caller),
 		Address: address,
 	}
 }
