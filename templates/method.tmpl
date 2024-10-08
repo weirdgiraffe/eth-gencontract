@@ -17,7 +17,7 @@ func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inpu
 	if err != nil {
 		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed to pack arguments: %w", err)
 	}
-	opts := append(opts, callopts.To(c.Address), callopts.Data(input)) 
+	opts = append(opts, callopts.To(c.Address), callopts.Data(input)) 
 	{{ if .Outputs -}}res{{- else -}}_{{- end -}}, err {{ if .Outputs }}:{{ end }}= c.caller.CallContract(ctx, opts...)
 	if err != nil {
 		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed call method: %w", err)

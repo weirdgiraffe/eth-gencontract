@@ -77,7 +77,7 @@ type CallConfig struct {
 	BlockNumber *big.Int
 }
 
-func (c *ContractCaller) Call(ctx context.Context, opts ...Opt) ([]byte, error) {
+func (c *ContractCaller) CallContract(ctx context.Context, opts ...Opt) ([]byte, error) {
 	var cfg CallConfig
 	for _, opt := range opts {
 		opt(&cfg)
