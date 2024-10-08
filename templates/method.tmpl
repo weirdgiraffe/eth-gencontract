@@ -19,7 +19,7 @@ func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inpu
 	}
 
 	msg := ethereum.CallMsg{To: &c.Address, Data: input}
-	{{ if .Outputs -}}res{{- else -}}_{{- end -}}, err {{ if .Outputs }}:{{ end }}= c.caller.CallContract(ctx, msg, blockNumber)
+	{{ if .Outputs -}}res{{- else -}}_{{- end -}}, err {{ if .Outputs }}:{{ end }}= c.caller.CallContract(ctx, msg, _blockNumber)
 	if err != nil {
 		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed call method: %w", err)
 	}
