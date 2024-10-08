@@ -74,11 +74,11 @@ func collectMethod(contract *Contract, method abi.Method) error {
 	if !isFunction(method) {
 		return nil
 	}
-	typ, inputs := asArguments(method.Inputs)
+	typ, inputs := asArguments(contract.Name, method.Inputs)
 	for i := range typ {
 		contract.Types[typ[i].Name] = typ[i].Fields
 	}
-	typ, outputs := asArguments(method.Outputs)
+	typ, outputs := asArguments(contract.Name, method.Outputs)
 	for i := range typ {
 		contract.Types[typ[i].Name] = typ[i].Fields
 	}
@@ -166,7 +166,7 @@ func asStructFields(typ reflect.Type) (res []reflect.StructField) {
 	return res
 }
 
-func asArguments(abiArgs abi.Arguments) ([]Type, Arguments) {
+func asArguments(contractName string, abiArgs abi.Arguments) ([]Type, Arguments) {
 	var args Arguments
 	var types []Type
 	for _, arg := range abiArgs {
@@ -175,14 +175,12 @@ func asArguments(abiArgs abi.Arguments) ([]Type, Arguments) {
 		isSlice := false
 
 		if typ := arg.Type.GetType(); isOfCustomType(typ) {
-			typName := strcase.UpperCamelCase(arg.Name)
+			typName := arg.Type.TupleRawName
 			if typName == "" {
-				typName = arg.Type.TupleRawName
-				if typName == "" {
-					typName = arg.Type.Elem.TupleRawName
-					isSlice = true
-				}
+				typName = arg.Type.Elem.TupleRawName
+				isSlice = true
 			}
+			typName = strings.TrimPrefix(typName, contractName)
 			argType = typPrefixes(typ) + typName
 
 			ctype := Type{
