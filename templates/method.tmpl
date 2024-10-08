@@ -13,7 +13,7 @@ func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inpu
 	{{ end }}
 	{{- if gt (len .Outputs) 0 -}} ) {{- end }}
 
-	input, err := c.ABI.Pack("{{ .Name }}" {{- range $index, $arg := .Inputs -}} , {{ $arg.Name }} {{- end -}})
+	input, err := {{- PublicVarName .Contract -}}ABI.Pack("{{ .Name }}" {{- range $index, $arg := .Inputs -}} , {{ $arg.Name }} {{- end -}})
 	if err != nil {
 		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed to pack arguments: %w", err)
 	}
@@ -25,7 +25,7 @@ func (c *{{ .Contract}}) {{ PublicVarName .Name -}} ({{- template "inputs" .Inpu
 	}
 
 	{{- if .Outputs }}
-	results, err := c.ABI.Unpack("{{ .Name }}", res)
+	results, err := {{- PublicVarName .Contract -}}ABI.Unpack("{{ .Name }}", res)
 	if err != nil {
 		return {{ template "results" .Outputs }}{{- if .Outputs }}, {{ end -}} fmt.Errorf("failed to unpack outputs: %w", err)
 	}
