@@ -15,7 +15,7 @@ func TestUSDC(t *testing.T) {
 	rpc := RPCClient(t)
 	usdc := NewUSDC(rpc)
 
-	name, err := usdc.Name(context.Background())
+	name, err := usdc.Name(context.Background(), nil)
 	require.NoError(t, err)
 	fmt.Println("Name:", name)
 }
